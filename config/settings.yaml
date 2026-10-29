@@ -1,0 +1,14 @@
+execution:
+  initial_cash: 100000.0
+  commission: 0.0002
+  spread: 0.0001
+  slippage_ticks: 0
+  trade_on_close: false
+  exclusive_orders: true
+
+risk:
+  type: percent
+  value: 1.0
+  max_open_positions: 1
+
+output_dir: reports/output

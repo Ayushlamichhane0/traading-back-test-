@@ -1,0 +1,44 @@
+instruments:
+  - symbol: XAUUSD
+    timeframe: 15m
+    data_path: data/raw/XAUUSD_M15.csv
+    date_start: 2021-01-01
+    date_end: 2024-12-31
+
+risk:
+  type: percent
+  value: 1.0          # Risk 1.0% equity per trade
+  max_open_positions: 1
+
+execution:
+  initial_cash: 100000.0
+  commission: 0.0002
+  spread: 0.00015
+  trade_on_close: false
+  exclusive_orders: true
+
+session_filter:
+  enabled: false      # Set to true to filter by session windows
+  windows:
+    - name: London
+      start_utc: "07:00"
+      end_utc: "12:00"
+    - name: New_York
+      start_utc: "13:00"
+      end_utc: "18:00"
+
+strategy:
+  name: Gold Trend
+  module: strategy.gold_trend.GoldTrend
+  params:
+    fast_period: 20
+    slow_period: 50
+    trend_period: 200
+    exit_on_cross: false
+  stop_loss:
+    method: atr
+    value: 2.0        # 2x ATR stop loss
+    atr_period: 14
+  take_profit:
+    method: rr
+    value: 3.0        # 3R take profit (3x risk distance)

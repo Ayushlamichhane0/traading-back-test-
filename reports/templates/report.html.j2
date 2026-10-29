@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Platform — Backtest Performance Report</title>
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent: #1e40af;
+      --accent-light: #eff6ff;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      padding: 32px 48px;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 16px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    h1 { font-size: 28px; font-weight: 800; color: #1e3a8a; }
+    .subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 36px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--bg-card);
+      border-radius: 10px;
+      padding: 16px 20px;
+      border-left: 5px solid var(--accent);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      border-left-width: 5px;
+    }
+    .kpi-card.green-card { border-left-color: var(--success); }
+    .kpi-card.red-card { border-left-color: var(--danger); }
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .positive { color: var(--success); }
+    .negative { color: var(--danger); }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .chart-container {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .chart-container img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .highlight-box {
+      display: flex;
+      gap: 24px;
+      margin: 16px 0;
+      background: #f1f5f9;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    table.table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+      text-align: left;
+    }
+    table.table th {
+      background: #1e3a8a;
+      color: white;
+      padding: 10px 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+    table.table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    table.table tr:hover td {
+      background-color: #f8fafc;
+    }
+    table.table tr:nth-child(even) td {
+      background-color: #fafbfc;
+    }
+
+    .footer {
+      margin-top: 48px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Backtest Performance Report</h1>
+        <div class="subtitle">Institutional execution analysis, session breakdown & risk metrics</div>
+      </div>
+      <div>
+        <span class="badge">Backtesting.py Engine</span>
+      </div>
+    </header>
+
+    <!-- Executive KPI Grid -->
+    <h2 class="section-title">Executive Summary</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Trades</div>
+        <div class="kpi-value">{{ r.total_trades }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Win Rate</div>
+        <div class="kpi-value">{{ "%.1f"|format(r.win_rate) }}%</div>
+      </div>
+      <div class="kpi-card {{ 'green-card' if r.net_pnl >= 0 else 'red-card' }}">
+        <div class="kpi-label">Net PnL</div>
+        <div class="kpi-value {{ 'positive' if r.net_pnl >= 0 else 'negative' }}">${{ "{:,.2f}".format(r.net_pnl) }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Profit Factor</div>
+        <div class="kpi-value">{{ "%.2f"|format(r.profit_factor) }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Expectancy / Trade</div>
+        <div class="kpi-value {{ 'positive' if r.expectancy >= 0 else 'negative' }}">${{ "{:,.2f}".format(r.expectancy) }}</div>
+      </div>
+      <div class="kpi-card red-card">
+        <div class="kpi-label">Max Drawdown</div>
+        <div class="kpi-value negative">{{ "%.2f"|format(r.max_drawdown_pct) }}%</div>
+      </div>
+    </div>
+
+    <!-- Secondary KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Average Win</div>
+        <div class="kpi-value positive">${{ "{:,.2f}".format(r.avg_win) }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Average Loss</div>
+        <div class="kpi-value negative">${{ "{:,.2f}".format(r.avg_loss) }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Win / Loss Ratio</div>
+        <div class="kpi-value">{{ "%.2f"|format(r.risk_reward) }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg R-Multiple</div>
+        <div class="kpi-value">{{ "%.2f"|format(r.avg_r_multiple) }}R</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Consecutive Wins (Max)</div>
+        <div class="kpi-value positive">{{ r.max_consecutive_wins }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Consecutive Losses (Max)</div>
+        <div class="kpi-value negative">{{ r.max_consecutive_losses }}</div>
+      </div>
+    </div>
+
+    <!-- Equity Curve & Drawdown -->
+    <h2 class="section-title">Equity Curve & Drawdowns</h2>
+    <div class="card">
+      <div class="chart-container">
+        <img src="data:image/png;base64,{{ equity_chart }}" alt="Equity Curve">
+      </div>
+      <div class="chart-container">
+        <img src="data:image/png;base64,{{ drawdown_chart }}" alt="Drawdown Percentage">
+      </div>
+    </div>
+
+    <!-- Monthly Performance & Heatmap -->
+    <h2 class="section-title">Monthly Performance</h2>
+    <div class="card">
+      {% if monthly_heatmap %}
+      <div class="chart-container">
+        <img src="data:image/png;base64,{{ monthly_heatmap }}" alt="Monthly Heatmap">
+      </div>
+      {% endif %}
+      <div class="highlight-box">
+        <div><strong>Best Month:</strong> {{ r.best_month.month }} (PnL: ${{ "{:,.2f}".format(r.best_month.net_pnl) }})</div>
+        <div><strong>Worst Month:</strong> {{ r.worst_month.month }} (PnL: ${{ "{:,.2f}".format(r.worst_month.net_pnl) }})</div>
+      </div>
+      {{ monthly_table | safe }}
+    </div>
+
+    <!-- Session Performance -->
+    <h2 class="section-title">Trading Session Breakdown</h2>
+    <div class="card">
+      <div class="highlight-box">
+        <div><strong>Best Session:</strong> {{ r.best_session.session }} (PnL: ${{ "{:,.2f}".format(r.best_session.net_pnl) }})</div>
+        <div><strong>Worst Session:</strong> {{ r.worst_session.session }} (PnL: ${{ "{:,.2f}".format(r.worst_session.net_pnl) }})</div>
+      </div>
+      {{ session_table | safe }}
+    </div>
+
+    <!-- Day of Week & Hour Breakdowns -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div>
+        <h2 class="section-title">Day of Week</h2>
+        <div class="card">
+          {{ dow_table | safe }}
+        </div>
+      </div>
+      <div>
+        <h2 class="section-title">Hour of Day (UTC)</h2>
+        <div class="card">
+          {{ hour_table | safe }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Symbol & Strategy Breakdown -->
+    <h2 class="section-title">Instrument Breakdown</h2>
+    <div class="card">
+      {{ symbol_table | safe }}
+    </div>
+
+    <div class="footer">
+      Generated automatically by Trading Platform Foundation &bull; Institutional Rule-Based Backtest System
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+instruments:
+  - symbol: EURUSD
+    timeframe: 1h
+    data_path: data/raw/EURUSD_H1.csv
+    date_start: 2022-01-01
+    date_end: 2024-12-31
+
+risk:
+  type: percent
+  value: 1.0          # risk 1% of equity per trade
+  max_open_positions: 1
+
+execution:
+  initial_cash: 100000.0
+  commission: 0.0002
+  spread: 0.0001
+  trade_on_close: false
+  exclusive_orders: true
+
+session_filter:
+  enabled: true
+  windows:
+    - name: Asia
+      start_utc: "00:00"
+      end_utc: "07:00"
+    - name: London
+      start_utc: "07:00"
+      end_utc: "13:00"
+    - name: New_York
+      start_utc: "13:00"
+      end_utc: "21:00"
+
+strategy:
+  name: MA Crossover
+  module: strategy.ma_crossover.MACrossoverStrategy
+  params:
+    fast_period: 20
+    slow_period: 50
+  stop_loss:
+    method: atr
+    value: 1.5
+    atr_period: 14
+  take_profit:
+    method: rr
+    value: 2.0        # 2R target

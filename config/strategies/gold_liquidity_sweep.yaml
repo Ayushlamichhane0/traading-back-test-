@@ -1,0 +1,43 @@
+instruments:
+  - symbol: XAUUSD
+    timeframe: 15m
+    data_path: data/raw/XAUUSD_M15.csv
+    date_start: 2021-01-01
+    date_end: 2024-12-31
+
+risk:
+  type: percent
+  value: 0.5
+
+execution:
+  initial_cash: 100000
+  commission: 0.00005
+  spread: 0.00015
+  trade_on_close: false
+  exclusive_orders: true
+
+session_filter:
+  enabled: true
+  windows:
+    - name: London
+      start_utc: "07:00"
+      end_utc: "12:00"
+    - name: New_York
+      start_utc: "13:00"
+      end_utc: "18:00"
+
+strategy:
+  name: Gold Liquidity Sweep
+  module: strategy.gold_liquidity_sweep.GoldLiquiditySweep
+  params:
+    pip_size: 0.1
+    sl_buffer_pips: 2.0
+    max_trades_per_day: 2
+    one_per_level: true
+    day_shift_hours: 0
+  stop_loss:
+    method: fixed_points
+    value: 100.0
+  take_profit:
+    method: fixed_points
+    value: 100.0
